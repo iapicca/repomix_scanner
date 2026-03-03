@@ -5,7 +5,7 @@ FROM ghcr.io/yamadashy/repomix:latest
 WORKDIR /app
 
 # Default environment variables
-ENV REPO_URL="https://github.com/dart-lang/sdk"
+ENV REPO_URL="https://github.com/yamadashy/repomix"
 ENV BRANCH="main"
 
 # Cap Node.js memory to 1.5GB to prevent the Podman VM from silently crashing
@@ -14,7 +14,7 @@ ENV NODE_OPTIONS="--max-old-space-size=1536"
 # Aggressive ignore list to filter out massive, non-architectural folders
 ENV IGNORE_PATTERNS="**/*.test.*,**/*.spec.*,docs/,tests/,.github/,third_party/,pkg/,benchmarks/"
 
-# Create the distillation script
+# Create the scanner script
 RUN echo '#!/bin/sh\n\
 set -e\n\
 \n\
@@ -22,7 +22,7 @@ set -e\n\
 REPO_NAME=$(basename -s .git "$REPO_URL")\n\
 OUTPUT_FILE="/app/${REPO_NAME}_agent.md"\n\
 \n\
-echo "🚀 Starting distillation of $REPO_URL (Branch: $BRANCH)..."\n\
+echo "🚀 Starting scan of $REPO_URL (Branch: $BRANCH)..."\n\
 echo "🧠 Node Memory Limit: $NODE_OPTIONS"\n\
 echo "🚫 Ignoring: $IGNORE_PATTERNS"\n\
 \n\
@@ -37,13 +37,13 @@ repomix --remote "$REPO_URL" \\\n\
         --ignore "$IGNORE_PATTERNS"\n\
 \n\
 echo "======================================================="\n\
-echo "✅ Distillation complete!"\n\
+echo "✅ Scan complete!"\n\
 echo "📄 Slim agent file generated at: $OUTPUT_FILE"\n\
 echo "======================================================="\n\
-' > /usr/local/bin/distill.sh
+' > /usr/local/bin/scan.sh
 
 # Make the script executable
-RUN chmod +x /usr/local/bin/distill.sh
+RUN chmod +x /usr/local/bin/scan.sh
 
 # Override the base image's entrypoint with our custom script
-ENTRYPOINT ["/usr/local/bin/distill.sh"]
+ENTRYPOINT ["/usr/local/bin/scan.sh"]
